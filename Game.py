@@ -6,16 +6,17 @@ import time
 canvas_width = 800
 canvas_height = 400
 root = Tk()
-c = Canvas(root, width=canvas_width, height=canvas_height, background='deep sky blue')
-c.create_rectangle(-5, canvas_height - 100, canvas_width + 5, canvas_height + 5, fill='sea green', width=0)
-c.create_oval(-80, -80, 120, 120, fill='orange', width=0)
+c = Canvas(root, width=canvas_width, height=canvas_height, background='deep sky blue')  # creates the sky
+c.create_rectangle(-5, canvas_height - 100, canvas_width + 5, canvas_height + 5, fill='sea green', width=0)  # creates the grass
+c.create_oval(-80, -80, 120, 120, fill='orange', width=0)  # creates the sun in the corner
 c.pack()
-color_cycle = cycle(['light coral','lemon chiffon', 'CadetBlue1'])
-egg_width = 45
-egg_height = 55
-egg_score = 10
-egg_speed = 500
-egg_interval = 4000
+
+color_cycle = cycle(['light coral','lemon chiffon', 'CadetBlue1'])  # the colors of the balls
+ball_width = 45
+ball_height = 45
+ball_score = 10
+ball_speed = 500
+ball_interval = 4000
 difficulty_factor = 0.95
 catcher_color = 'blue'
 catcher_width = 100
@@ -44,29 +45,29 @@ score_text = c.create_text(10, 10, anchor='nw', font=game_font, fill='darkblue',
 lives_remaining = 3
 lives_text = c.create_text(canvas_width - 10, 10, anchor='ne', font=game_font, fill='darkblue',
                            text='Lives: ' + str(lives_remaining))
-eggs = []
+balls = []
 
 
-def create_egg():
+def create_ball():
     x = randrange(10, 740)
     y = 40
-    new_egg = c.create_oval(x, y, x + egg_width, y + egg_height, fill=next(color_cycle), width=0)
-    eggs.append(new_egg)
-    root.after(egg_interval, create_egg)
+    new_ball = c.create_oval(x, y, x + ball_width, y + ball_height, fill=next(color_cycle), width=0)
+    balls.append(new_ball)
+    root.after(ball_interval, create_ball)
 
 
-def move_eggs():
-    for egg in eggs:
-        (egg_x, egg_y, egg_x2, egg_y2) = c.coords(egg)
-        c.move(egg, 0, 10)
-        if egg_y2 > canvas_height:
-            egg_dropped(egg)
-    root.after(egg_speed, move_eggs)
+def move_balls():
+    for ball in balls:
+        (ball_x, ball_y, ball_x2, ball_y2) = c.coords(ball)
+        c.move(ball, 0, 10)
+        if ball_y2 > canvas_height:
+            ball_dropped(ball)
+    root.after(ball_speed, move_balls)
 
 
-def egg_dropped(egg):
-    eggs.remove(egg)
-    c.delete(egg)
+def ball_dropped(ball):
+    balls.remove(ball)
+    c.delete(ball)
     lose_a_life()
     if lives_remaining == 0:
         messagebox.showinfo('Game Over!', 'Final Score: ' + str(score))
@@ -81,20 +82,20 @@ def lose_a_life():
 
 def check_catch():
     (catcher_x, catcher_y, catcher_x2, catcher_y2) = c.coords(catcher)
-    for egg in eggs:
-        (egg_x, egg_y, egg_x2, egg_y2) = c.coords(egg)
-        if catcher_x < egg_x and egg_x2 < catcher_x2 and catcher_y2 - egg_y2 < 40:
-            eggs.remove(egg)
-            c.delete(egg)
-            increase_score(egg_score)
+    for ball in balls:
+        (ball_x, ball_y, ball_x2, ball_y2) = c.coords(ball)
+        if catcher_x < ball_x and ball_x2 < catcher_x2 and catcher_y2 - ball_y2 < 40:
+            balls.remove(ball)
+            c.delete(ball)
+            increase_score(ball_score)
     root.after(100, check_catch)
 
 
 def increase_score(points):
-    global score, egg_speed, egg_interval
+    global score, ball_speed, ball_interval
     score += points
-    egg_speed = int(egg_speed * difficulty_factor)
-    egg_interval = int(egg_interval * difficulty_factor)
+    ball_speed = int(ball_speed * difficulty_factor)
+    ball_interval = int(ball_interval * difficulty_factor)
     c.itemconfigure(score_text, text='Score: ' + str(score))
 
 
@@ -114,7 +115,7 @@ c.bind('<Left>', move_left)
 c.bind('<Right>', move_right)
 c.focus_set()
 
-root.after(1000, create_egg)
-root.after(1000, move_eggs)
+root.after(1000, create_ball)
+root.after(1000, move_balls)
 root.after(1000, check_catch)
 root.mainloop()
